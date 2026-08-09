@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fafafa;
+  --foreground: #18181b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Rendered markdown */
+.md-body {
+  line-height: 1.7;
+  font-size: 0.9rem;
+  color: inherit;
+  word-wrap: break-word;
+}
+.md-body > *:first-child {
+  margin-top: 0;
+}
+.md-body > *:last-child {
+  margin-bottom: 0;
+}
+.md-body h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 1.1rem 0 0.5rem;
+}
+.md-body h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 1rem 0 0.4rem;
+}
+.md-body h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 0.9rem 0 0.35rem;
+}
+.md-body h4 {
+  font-size: 0.96rem;
+  font-weight: 600;
+  margin: 0.8rem 0 0.3rem;
+}
+.md-body p {
+  margin: 0.5rem 0;
+}
+.md-body ul,
+.md-body ol {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+}
+.md-body ul {
+  list-style: disc;
+}
+.md-body ol {
+  list-style: decimal;
+}
+.md-body li {
+  margin: 0.2rem 0;
+}
+.md-body li > ul,
+.md-body li > ol {
+  margin: 0.15rem 0;
+}
+.md-body strong {
+  font-weight: 600;
+}
+.md-body code {
+  background: rgba(127, 127, 127, 0.15);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-family: var(--font-geist-mono);
+  font-size: 0.85em;
+}
+.md-body pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.9rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.6rem 0;
+}
+.md-body pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+.md-body blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding-left: 0.9rem;
+  color: #64748b;
+  margin: 0.6rem 0;
+}
+.md-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.6rem 0;
+  font-size: 0.85rem;
+}
+.md-body th,
+.md-body td {
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+.md-body th {
+  background: rgba(127, 127, 127, 0.1);
+  font-weight: 600;
+}
+.md-body a {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+.md-body hr {
+  border: 0;
+  border-top: 1px solid rgba(127, 127, 127, 0.2);
+  margin: 1rem 0;
+}
+
+/* Compact markdown (chat bubbles) */
+.md-body-compact {
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+.md-body-compact p {
+  margin: 0.3rem 0;
+}
+.md-body-compact h1,
+.md-body-compact h2,
+.md-body-compact h3,
+.md-body-compact h4 {
+  font-size: 1rem;
+  margin: 0.5rem 0 0.2rem;
+}
+.md-body-compact ul,
+.md-body-compact ol {
+  margin: 0.3rem 0;
+  padding-left: 1.2rem;
+}
+.md-body-compact table {
+  font-size: 0.78rem;
+}
