@@ -71,6 +71,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1">{children}</main>
+        <div className="mx-auto w-full max-w-5xl px-4 pb-4 text-right text-sm text-zinc-500 dark:text-zinc-400">
+          Made by{" "}
+          {process.env.AUTHOR_URL ? (
+            <a
+              href={process.env.AUTHOR_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-zinc-700 underline-offset-4 transition hover:text-zinc-900 hover:underline dark:text-zinc-300 dark:hover:text-zinc-100"
+            >
+              Abdullah Shaikh
+            </a>
+          ) : (
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">Abdullah Shaikh</span>
+          )}
+        </div>
         <footer className="border-t border-zinc-200 py-4 text-center text-xs text-zinc-400 dark:border-zinc-800">
           Teacher Notes Agent · Next.js + FastAPI + OpenAI Agents SDK
         </footer>
