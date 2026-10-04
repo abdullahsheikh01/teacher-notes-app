@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import TaskCard from "@/components/TaskCard";
 import ChatBox from "@/components/ChatBox";
@@ -30,9 +33,20 @@ const tasks = [
 ];
 
 export default function Home() {
+  const [chatOpen, setChatOpen] = useState(false);
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-10">
-      <section className="mb-10 text-center">
+      <section className="relative mb-10 text-center">
+        <div className="mb-4 flex justify-end sm:absolute sm:right-0 sm:top-1 sm:mb-0">
+          <button
+            type="button"
+            onClick={() => setChatOpen((o) => !o)}
+            className={`${chatOpen ? "" : "cursor-pointer "}rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600`}
+          >
+            {chatOpen ? "← Back to tasks" : "💬 Just Ask"}
+          </button>
+        </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
           Teacher Notes Agent
         </h1>
@@ -42,7 +56,7 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="mb-10">
+      <section className={chatOpen ? "hidden" : "mb-10"}>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">
           Pick a task
         </h2>
@@ -53,7 +67,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section>
+      {/* Kept mounted while hidden so the conversation survives toggling. */}
+      <section className={chatOpen ? "" : "hidden"}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
             Just ask

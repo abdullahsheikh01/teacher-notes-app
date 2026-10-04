@@ -12,7 +12,7 @@ A responsive web app that helps teachers generate, organize, summarize, and plan
 
 - Node.js 18+
 - Python 3.10+
-- `OPENAI_API_KEY` (set in `backend/.env`)
+- `LLM_API_KEY`, `LLM_MODEL` and optional `LLM_BASE_URL` (set in `backend/.env`)
 
 ## Setup
 
@@ -23,7 +23,7 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # add your OPENAI_API_KEY
+cp .env.example .env        # add your LLM_API_KEY (and LLM_BASE_URL for non-OpenAI providers)
 uvicorn main:app --reload --port 8000
 ```
 

@@ -17,8 +17,13 @@ def build_prompt(user_text: str, extra_instructions: str | None = None) -> str:
     return user_text
 
 
-async def agent_stream(agent: object, prompt: str) -> AsyncIterator[str]:
+async def agent_stream(
+    agent: object, prompt: str, history: list | None = None
+) -> AsyncIterator[str]:
     """Run an agent with streaming and yield SSE-encoded events.
+
+    ``history`` (earlier chat messages) is sent ahead of ``prompt`` so the
+    agent can follow up on the conversation instead of starting fresh.
 
     Imports the OpenAI Agents SDK lazily so the FastAPI app starts quickly
     and only agent calls pay the (heavy) SDK import cost.
@@ -26,7 +31,13 @@ async def agent_stream(agent: object, prompt: str) -> AsyncIterator[str]:
     from agents import Runner
 
     try:
-        result = Runner.run_streamed(agent, prompt)
+        if history:
+            messages = [{"role": m.role, "content": m.content} for m in history]
+            result = Runner.run_streamed(
+                agent, messages + [{"role": "user", "content": prompt}]
+            )
+        else:
+            result = Runner.run_streamed(agent, prompt)
     except Exception as exc:  # noqa: BLE001
         yield sse({"type": "error", "message": f"Failed to start agent: {exc}"})
         return

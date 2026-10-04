@@ -13,6 +13,7 @@ import agent_factory
 from db import Note, get_session
 from file_parser import parse_file
 from schemas import (
+    ChatMessage,
     ChatRequest,
     ChatRoute,
     GenerateRequest,
@@ -105,7 +106,8 @@ async def summarize_notes(
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
-    route = await _route_message(req)
+    history = _chat_history(req)
+    route = await _route_message(req.message, history)
 
     if route.task == "general":
         agent = agent_factory.build_general()
@@ -113,7 +115,9 @@ async def chat(req: ChatRequest):
     else:
         agent = agent_factory.AGENTS[route.task]()
         prompt = _prompt_for_route(route)
-    return StreamingResponse(agent_stream(agent, prompt), media_type="text/event-stream")
+    return StreamingResponse(
+        agent_stream(agent, prompt, history), media_type="text/event-stream"
+    )
 
 
 # ---- history ----
@@ -164,12 +168,18 @@ async def _resolve_content(content: str | None, file: UploadFile | None) -> str:
     raise ValueError("Provide either text content or upload a file.")
 
 
-async def _route_message(req: ChatRequest) -> ChatRoute:
+def _chat_history(req: ChatRequest) -> list[ChatMessage]:
+    # A stopped or failed reply leaves an empty assistant message behind, and
+    # some providers reject empty content.
+    return [m for m in req.history[-6:] if m.content.strip()]
+
+
+async def _route_message(message: str, history: list[ChatMessage]) -> ChatRoute:
     from agents import Runner
 
     triage = agent_factory.build_triage()
-    history = "".join(f"{m.role}: {m.content}\n" for m in req.history[-6:])
-    prompt = f"Conversation history:\n{history}\nLatest message: {req.message}"
+    transcript = "".join(f"{m.role}: {m.content}\n" for m in history)
+    prompt = f"Conversation history:\n{transcript}\nLatest message: {message}"
     result = await Runner.run(triage, prompt)
     return result.final_output
 

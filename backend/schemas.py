@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class GenerateRequest(BaseModel):
@@ -40,6 +40,12 @@ class ChatRoute(BaseModel):
     objectives: str = ""
     extra: str = ""
     reasoning: str = ""
+
+    @field_validator("mode", mode="before")
+    @classmethod
+    def _default_mode(cls, value: object) -> object:
+        # Weaker models often send "" or other junk for this optional field.
+        return value if value in ("short", "simple") else "short"
 
 
 class NoteIn(BaseModel):

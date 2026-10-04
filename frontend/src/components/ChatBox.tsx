@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { streamFromBackend } from "@/lib/stream";
 import { saveNote } from "@/lib/api";
 import { titleFromMarkdown } from "@/lib/download";
@@ -15,6 +15,21 @@ export default function ChatBox() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Follow new content only while the user is at the bottom, so scrolling up
+  // to reread an earlier answer isn't yanked back down mid-stream.
+  const stickToBottomRef = useRef(true);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el && stickToBottomRef.current) el.scrollTop = el.scrollHeight;
+  }, [messages, streaming, error, saved]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
 
   const send = async () => {
     const text = input.trim();
@@ -22,8 +37,9 @@ export default function ChatBox() {
     setInput("");
     setError(null);
     setSaved(null);
+    stickToBottomRef.current = true;
 
-    const history = messages.slice(-6);
+    const history = messages.filter((m) => m.content.trim()).slice(-6);
     setMessages((prev) => [...prev, { role: "user", content: text }]);
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
     setStreaming(true);
@@ -68,8 +84,12 @@ export default function ChatBox() {
   };
 
   return (
-    <div className="flex h-[480px] flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+    <div className="flex h-[calc(100dvh-24rem)] min-h-[320px] flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 space-y-4 overflow-y-auto p-4"
+      >
         {messages.length === 0 && (
           <p className="pt-16 text-center text-sm text-zinc-400">
             Ask anything — e.g. <span className="italic">“Grade 6 science ke
