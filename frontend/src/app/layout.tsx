@@ -14,9 +14,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description = "Generate, organize, and summarize class notes with AI agents.";
+
 export const metadata: Metadata = {
+  // Unset, Next uses the Vercel production URL (or localhost) for preview links.
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : undefined,
   title: "Teacher Notes Agent",
-  description: "Generate, organize, and summarize class notes with AI agents.",
+  description,
+  openGraph: {
+    title: "Teacher Notes Agent",
+    description,
+    siteName: "NotesAgent",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Teacher Notes Agent",
+    description,
+  },
 };
 
 const navLinks = [
