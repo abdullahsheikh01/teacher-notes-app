@@ -30,6 +30,12 @@ const tasks = [
     title: "Lesson Plan + Worksheet",
     description: "A complete lesson plan with timetable, activities, and answer key.",
   },
+  {
+    href: "/tasks/viva",
+    icon: "🎤",
+    title: "Viva Questions",
+    description: "Oral questions with model answers to quiz students on any topic.",
+  },
 ];
 
 export default function Home() {
@@ -52,7 +58,7 @@ export default function Home() {
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-zinc-500 sm:text-base dark:text-zinc-400">
           Generate, organize, and summarize class notes — or build complete lesson
-          plans with worksheets — powered by AI agents.
+          plans with worksheets and viva questions — powered by AI agents.
         </p>
       </section>
 

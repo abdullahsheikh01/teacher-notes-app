@@ -42,6 +42,7 @@ const navLinks = [
   { href: "/tasks/organize", label: "Organize" },
   { href: "/tasks/summarize", label: "Summarize" },
   { href: "/tasks/lesson-plan", label: "Lesson Plan" },
+  { href: "/tasks/viva", label: "Viva" },
   { href: "/history", label: "History" },
 ];
 

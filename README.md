@@ -69,6 +69,7 @@ Each "skill" is an OpenAI Agent with its own instruction prompt:
 | Organize notes | `organizer` | Restructures messy text/files into the standard format |
 | Summarize | `summarizer` | Produces revision notes or simplifies language |
 | Lesson plan | `lesson_planner` | Builds a full lesson plan + worksheet + answer key |
+| Viva questions | `viva_questioner` | Oral questions + model answers by difficulty (easy / medium / hard / all), optionally from uploaded notes |
 | Chat | `triage` | Routes free-form prompts to the right agent |
 
 Skill prompts live in `backend/skills/*.md`.
@@ -79,6 +80,7 @@ Skill prompts live in `backend/skills/*.md`.
 - `POST /api/agents/organize` — stream organize (supports file upload via multipart)
 - `POST /api/agents/summarize` — stream summarize (supports file upload)
 - `POST /api/agents/lesson-plan` — stream lesson plan
+- `POST /api/agents/viva` — stream viva questions (supports notes text / file upload via multipart)
 - `POST /api/chat` — free chat (triage agent)
 - `GET/POST /api/notes` — list / save history
 - `GET/DELETE /api/notes/{id}` — get / delete one note

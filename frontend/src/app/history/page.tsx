@@ -45,6 +45,7 @@ export default function HistoryPage() {
     organize: "Organized",
     summarize: "Summarized",
     "lesson-plan": "Lesson Plan",
+    viva: "Viva",
     chat: "Chat",
   };
 

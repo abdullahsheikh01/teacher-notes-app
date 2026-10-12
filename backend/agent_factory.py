@@ -44,6 +44,7 @@ The available tasks:
 - "organize": teacher wants existing messy notes tidied up / restructured.
 - "summarize": teacher wants notes shortened into revision notes, or simplified.
 - "lesson-plan": teacher wants a full lesson plan (+ worksheet + answer key).
+- "viva": teacher wants viva / oral questions with answers to ask students.
 - "general": anything else - a question, small talk, or an unclear request.
 
 Extraction rules:
@@ -53,7 +54,9 @@ Extraction rules:
 - duration: only for lesson-plan, e.g. "40 minutes".
 - mode: only for summarize - "short" if they want it shortened, "simple" if they
   want easier language.
-- content: for "organize" or "summarize", include any notes text the teacher pasted.
+- content: for "organize", "summarize" or "viva", include any notes text the teacher pasted.
+- count: only for viva, the number of questions asked for (e.g. "10").
+- difficulty: only for viva - "easy", "medium", "hard", or "all" if not specified.
 - objectives: only for lesson-plan, any learning objectives the teacher gave.
 - extra: anything else extra the teacher asked for.
 
@@ -103,6 +106,16 @@ def build_lesson_planner():
     )
 
 
+def build_viva():
+    from agents import Agent
+
+    return Agent(
+        name="viva_questioner",
+        instructions=load_skill("viva-questions"),
+        model=get_model(),
+    )
+
+
 def build_general():
     from agents import Agent
 
@@ -133,6 +146,7 @@ AGENTS = {
     "organize": build_organizer,
     "summarize": build_summarizer,
     "lesson-plan": build_lesson_planner,
+    "viva": build_viva,
     "general": build_general,
     "triage": build_triage,
 }

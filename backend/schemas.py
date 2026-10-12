@@ -30,7 +30,7 @@ class ChatRequest(BaseModel):
 
 
 class ChatRoute(BaseModel):
-    task: Literal["generate", "organize", "summarize", "lesson-plan", "general"]
+    task: Literal["generate", "organize", "summarize", "lesson-plan", "viva", "general"]
     subject: str = ""
     topic: str = ""
     grade: str = ""
@@ -38,6 +38,8 @@ class ChatRoute(BaseModel):
     mode: Literal["short", "simple"] = "short"
     content: str = ""
     objectives: str = ""
+    count: str = ""
+    difficulty: Literal["easy", "medium", "hard", "all"] = "all"
     extra: str = ""
     reasoning: str = ""
 
@@ -46,6 +48,11 @@ class ChatRoute(BaseModel):
     def _default_mode(cls, value: object) -> object:
         # Weaker models often send "" or other junk for this optional field.
         return value if value in ("short", "simple") else "short"
+
+    @field_validator("difficulty", mode="before")
+    @classmethod
+    def _default_difficulty(cls, value: object) -> object:
+        return value if value in ("easy", "medium", "hard", "all") else "all"
 
 
 class NoteIn(BaseModel):

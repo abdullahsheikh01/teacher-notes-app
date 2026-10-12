@@ -69,6 +69,29 @@ async def lesson_plan(req: LessonPlanRequest):
     return StreamingResponse(agent_stream(agent, prompt), media_type="text/event-stream")
 
 
+@app.post("/api/agents/viva")
+async def viva_questions(
+    subject: Annotated[str, Form()],
+    topic: Annotated[str, Form()],
+    grade: Annotated[str, Form()] = "",
+    count: Annotated[str, Form()] = "15",
+    difficulty: Annotated[str, Form()] = "all",
+    extra: Annotated[str, Form()] = "",
+    content: Annotated[str | None, Form()] = None,
+    file: Annotated[UploadFile | None, File()] = None,
+):
+    # Notes are optional here: without them the agent works from the topic alone.
+    material = ""
+    if content or (file is not None and file.filename):
+        try:
+            material = await _resolve_content(content, file)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+    agent = agent_factory.build_viva()
+    prompt = _viva_prompt(subject, topic, grade, count, difficulty, material, extra)
+    return StreamingResponse(agent_stream(agent, prompt), media_type="text/event-stream")
+
+
 @app.post("/api/agents/organize")
 async def organize_notes(
     content: Annotated[str | None, Form()] = None,
@@ -197,6 +220,11 @@ def _prompt_for_route(route: ChatRoute) -> str:
             f"Duration: {route.duration or '45 minutes'}{extra}",
             route.extra,
         )
+    if route.task == "viva":
+        return _viva_prompt(
+            route.subject, route.topic, route.grade, route.count,
+            route.difficulty, route.content, route.extra,
+        )
     if route.task == "organize":
         return build_prompt(
             f"Content to organize:\n{route.content}\n\nSubject: {route.subject or '(infer)'}\nGrade: {route.grade or '(infer)'}"
@@ -204,6 +232,35 @@ def _prompt_for_route(route: ChatRoute) -> str:
     if route.task == "summarize":
         return build_prompt(f"Mode: {route.mode}\n\nContent:\n{route.content}")
     return build_prompt(route.content or "")
+
+
+def _viva_prompt(
+    subject: str,
+    topic: str,
+    grade: str,
+    count: str,
+    difficulty: str,
+    material: str,
+    extra: str,
+) -> str:
+    if difficulty not in ("easy", "medium", "hard", "all"):
+        difficulty = "all"
+    try:
+        n = min(max(int(count), 1), 30)
+    except ValueError:
+        n = 15
+    notes = f"\n\nMaterial:\n{material}" if material.strip() else ""
+    return build_prompt(
+        (
+            f"Subject: {subject}\n"
+            f"Topic: {topic or '(infer from material)'}\n"
+            f"Grade: {grade or '(infer)'}\n"
+            f"Count: {n}\n"
+            f"Difficulty: {difficulty}"
+            f"{notes}"
+        ),
+        extra,
+    )
 
 
 def _to_out(note: Note) -> NoteOut:
