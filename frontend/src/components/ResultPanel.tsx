@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { downloadDocx, downloadMarkdown, titleFromMarkdown } from "@/lib/download";
 import { saveNote } from "@/lib/api";
+import { copyRendered } from "@/lib/copy";
 import MarkdownBody from "@/components/MarkdownBody";
 
 export type ResultPanelProps = {
@@ -29,8 +30,25 @@ export default function ResultPanel({
   const [mode, setMode] = useState<"preview" | "edit">("preview");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const renderedRef = useRef<HTMLDivElement>(null);
 
   const hasText = text.trim().length > 0;
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // When the first chunk of a new result arrives, glide the panel up to sit
+  // just under the sticky header. Fires once per generation, not per token.
+  useEffect(() => {
+    if (!streaming || !hasText || !panelRef.current) return;
+    const header = document.querySelector("header");
+    const offset = (header?.getBoundingClientRect().height ?? 0) + 16;
+    // The first chunk is only a line or two, so the page is too short to
+    // scroll that far. Let the panel fill the screen to make room.
+    panelRef.current.style.minHeight = `${window.innerHeight - offset - 16}px`;
+    const top = panelRef.current.getBoundingClientRect().top + window.scrollY - offset;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
+  }, [streaming, hasText]);
 
   const handleSave = async () => {
     if (!hasText) return;
@@ -53,8 +71,19 @@ export default function ResultPanel({
     }
   };
 
+  const handleCopy = async () => {
+    if (!renderedRef.current) return;
+    try {
+      await copyRendered(renderedRef.current);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
   return (
-    <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div ref={panelRef} className="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       {streaming && (
         <div className="mb-3 flex items-center gap-3">
           <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
@@ -86,22 +115,31 @@ export default function ResultPanel({
         <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="flex rounded-lg border border-zinc-200 p-0.5 dark:border-zinc-700">
-              {(["preview", "edit"] as const).map((m) => (
+              {([
+                ["preview", "View"],
+                ["edit", "Edit Markdown"],
+              ] as const).map(([m, label]) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`rounded-md px-3 py-1 text-sm font-medium capitalize transition ${
+                  className={`rounded-md px-3 py-1 text-sm font-medium transition ${
                     mode === m
                       ? "bg-indigo-600 text-white"
                       : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                   }`}
                 >
-                  {m}
+                  {label}
                 </button>
               ))}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleCopy}
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+              >
+                {copied ? "Copied ✓" : "Copy"}
+              </button>
               {done && (
                 <button
                   onClick={handleSave}
@@ -126,9 +164,13 @@ export default function ResultPanel({
             </div>
           </div>
 
-          {mode === "preview" ? (
-            <MarkdownBody content={text} />
-          ) : (
+          {/* Always rendered so Copy works from edit mode too; kept off-screen while editing. */}
+          <MarkdownBody
+            ref={renderedRef}
+            content={text}
+            className={mode === "edit" ? "md-offscreen" : ""}
+          />
+          {mode === "edit" && (
             <textarea
               value={text}
               onChange={(e) => onChange(e.target.value)}

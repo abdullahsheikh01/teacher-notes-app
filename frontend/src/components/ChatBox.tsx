@@ -109,9 +109,7 @@ export default function ChatBox() {
               }`}
             >
               {m.role === "assistant" ? (
-                <div className="md-body md-body-compact">
-                  <MarkdownBody content={m.content} />
-                </div>
+                <MarkdownBody content={m.content} className="md-body-compact" />
               ) : (
                 <span className="whitespace-pre-wrap">{m.content}</span>
               )}

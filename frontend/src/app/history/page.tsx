@@ -1,15 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PageShell from "@/components/PageShell";
 import { deleteNote, listNotes, type SavedNote } from "@/lib/api";
 import { downloadDocx, downloadMarkdown, titleFromMarkdown } from "@/lib/download";
 import MarkdownBody from "@/components/MarkdownBody";
+import { copyRendered } from "@/lib/copy";
 
 export default function HistoryPage() {
   const [notes, setNotes] = useState<SavedNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
+  const renderedRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = async () => {
+    if (!renderedRef.current) return;
+    try {
+      await copyRendered(renderedRef.current);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -103,9 +117,15 @@ export default function HistoryPage() {
             {expanded === note.id && (
               <div className="border-t border-zinc-200 px-4 py-4 dark:border-zinc-800">
                 <div className="max-h-[420px] overflow-y-auto rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                  <MarkdownBody content={note.content} />
+                  <MarkdownBody ref={renderedRef} content={note.content} />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={handleCopy}
+                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+                  >
+                    {copied ? "Copied ✓" : "Copy"}
+                  </button>
                   <button
                     onClick={() => downloadMarkdown(note.content, `${titleFromMarkdown(note.content, "notes").toLowerCase().replace(/\s+/g, "-")}.md`)}
                     className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
